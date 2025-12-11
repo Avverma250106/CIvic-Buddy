@@ -1,18 +1,16 @@
 import mongoose from "mongoose";
 
-const ComplaintSchema = new mongoose.Schema(
+const complaintSchema = new mongoose.Schema(
   {
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-
     imageUrl: {
       type: String,
       required: true,
     },
-
     issueType: {
       type: String,
       enum: [
@@ -28,53 +26,94 @@ const ComplaintSchema = new mongoose.Schema(
         "illegal_construction",
         "other",
       ],
-      default: "other",
+      default: 'other',
     },
-
     description: {
       type: String,
+      required: true,
       trim: true,
     },
-
-    location: {
-      latitude: { type: Number },
-      longitude: { type: Number },
-      address: { type: String },
-    },
-
     assignedDepartment: {
       type: String,
-      trim: true,
+      enum: ['pwd', 'electricity', 'water', 'nrmc', 'environment', 'nrda'],
+      required: true,
     },
-
     status: {
       type: String,
-      enum: ["pending", "in_progress", "resolved", "escalated", "closed"],
-      default: "pending",
+      enum: ['pending', 'in_progress', 'resolved', 'rejected'],
+      default: 'pending',
     },
-
-    municipalReferenceUrl: {
-      type: String,
+    location: {
+      latitude: {
+        type: Number,
+        min: -90,
+        max: 90,
+      },
+      longitude: {
+        type: Number,
+        min: -180,
+        max: 180,
+      },
+      address: {
+        type: String,
+        trim: true,
+      },
     },
-
-    lastUpdateFromPortal: {
-      type: Date,
+    // AI Classification metadata
+    aiClassification: {
+      category: {
+        type: String,
+        default: null,
+      },
+      confidence: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: 0,
+      },
+      department: {
+        type: String,
+        default: null,
+      },
+      description: {
+        type: String,
+        default: null,
+      },
+      classifiedAt: {
+        type: Date,
+        default: null,
+      },
+      usedGemini: {
+        type: Boolean,
+        default: false,
+      },
     },
-
-    escalationCount: {
-      type: Number,
-      default: 0,
+    // Department response
+    departmentResponse: {
+      message: String,
+      respondedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+      respondedAt: Date,
     },
-    lastEscalationDate: {
-      type: Date,
-    },
-
-    rtiDocumentUrl: {
-      type: String,
-    },
+    // Resolution details
+    resolvedAt: Date,
+    rejectedAt: Date,
+    rejectionReason: String,
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-export default mongoose.models.Complaint ||
-  mongoose.model("Complaint", ComplaintSchema);
+// Index for faster queries
+complaintSchema.index({ createdBy: 1, status: 1 });
+complaintSchema.index({ assignedDepartment: 1, status: 1 });
+complaintSchema.index({ createdAt: -1 });
+
+const complaintModel = 
+  mongoose.models.Complaint || 
+  mongoose.model("Complaint", complaintSchema);
+
+export default complaintModel;

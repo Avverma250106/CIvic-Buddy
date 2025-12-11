@@ -21,9 +21,10 @@ export async function GET({params}){
         }
 
         await connectDB();
+        const slug = deptSlug.toLowerCase();
 
         const allComplains = await complaintModel
-            .find({ assignedDepartment: deptSlug})
+            .find({ assignedDepartment: slug})
             .sort({createdAt: -1})
             .select('_id issueType description location status')
             .lean();

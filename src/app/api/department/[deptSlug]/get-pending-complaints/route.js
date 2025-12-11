@@ -18,8 +18,10 @@ export async function GET(req, {params}){
 
         await connectDB();
 
+        const slug = deptSlug.toLowerCase();
+
         const pendingComplaints = await complaintModel
-            .find({ assignedDepartment: deptSlug, status: 'pending'})
+            .find({ assignedDepartment: slug, status: 'pending'})
             .sort({createdAt: -1})
             .select('_id issueType description location status')
             .lean();

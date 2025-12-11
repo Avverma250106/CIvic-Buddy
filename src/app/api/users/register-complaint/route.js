@@ -7,9 +7,66 @@ import User from "@/models/user.model";
 
 connectDB();
 
+// FastAPI endpoint configuration
+const FASTAPI_BASE_URL = process.env.FASTAPI_BASE_URL || "http://127.0.0.1:8000";
+
+/**
+ * Call FastAPI to classify the image and get department assignment
+ */
+async function classifyComplaintImage(imageUrl) {
+  try {
+    const response = await fetch(`${FASTAPI_BASE_URL}/predict-url`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        image_url: imageUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`FastAPI returned status ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    return {
+      success: true,
+      category: data.prediction.class,
+      department: data.prediction.department,
+      confidence: data.prediction.confidence,
+      description: data.prediction.description,
+      usedGemini: data.prediction.used_gemini,
+      allProbabilities: data.all_probabilities,
+    };
+  } catch (error) {
+    console.error("Error calling FastAPI:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
+/**
+ * Map department names from FastAPI to your department slugs
+ */
+function mapDepartmentToSlug(department) {
+  const departmentMap = {
+    'PWD': 'pwd',
+    'Electricity': 'electricity',
+    'Water': 'water',
+    'NRMC': 'nrmc',
+    'Environment': 'environment',
+  };
+  
+  return departmentMap[department] || 'general';
+}
+
 export async function POST(req) {
   try {
-    // deconstructing everything from from
+    // Deconstructing everything from form
     const formData = await req.formData();
     const file = formData.get("file");
     const issueType = formData.get("issue-type");
@@ -17,7 +74,7 @@ export async function POST(req) {
     const latitude = formData.get("latitude");
     const longitude = formData.get("longitude");
     const address = formData.get("address");
-    const assignedDepartment = formData.get("assigned-dept");
+    const manualDepartment = formData.get("assigned-dept"); // Optional manual override
 
     const userId = getDataFromToken(req);
 
@@ -25,7 +82,7 @@ export async function POST(req) {
       return NextResponse.json({
         success: false,
         message: "Unauthorized - Invalid token",
-        statusCode: 404,
+        statusCode: 401,
       });
     }
 
@@ -43,7 +100,7 @@ export async function POST(req) {
       return NextResponse.json({
         success: false,
         message: "File not found",
-        statusCode: 404,
+        statusCode: 400,
       });
     }
 
@@ -51,13 +108,49 @@ export async function POST(req) {
       return NextResponse.json({
         success: false,
         message: "Description is required",
-        stausCode: 404,
+        statusCode: 400,
       });
     }
 
-    // Upload file to Cloudinary and get the URL
+    // ===== STEP 1: Upload file to Cloudinary =====
+    console.log("📤 Uploading image to Cloudinary...");
     const imageUrl = await uploadToCloudinary(file, "civic-buddy");
+    console.log("✅ Image uploaded:", imageUrl);
 
+    // ===== STEP 2: Classify image using FastAPI =====
+    console.log("🤖 Classifying image with AI model...");
+    const classification = await classifyComplaintImage(imageUrl);
+    
+    let assignedDepartment;
+    let aiCategory;
+    let aiConfidence;
+    let aiDescription;
+    
+    if (classification.success) {
+      console.log("✅ Classification successful:", classification);
+      
+      // Convert department name to slug
+      assignedDepartment = mapDepartmentToSlug(classification.department);
+      aiCategory = classification.category;
+      aiConfidence = classification.confidence;
+      aiDescription = classification.description;
+      
+      // Allow manual override if provided
+      if (manualDepartment && manualDepartment.trim() !== '') {
+        console.log("⚠️ Manual department override:", manualDepartment);
+        assignedDepartment = manualDepartment;
+      }
+    } else {
+      console.error("❌ Classification failed:", classification.error);
+      
+      // Fallback: use manual department or default
+      assignedDepartment = manualDepartment || 'general';
+      aiCategory = issueType || 'other';
+      aiConfidence = 0;
+      aiDescription = "Classification unavailable";
+    }
+
+    // ===== STEP 3: Prepare location data =====
     const locationData = {};
     
     if (latitude && longitude) {
@@ -69,32 +162,58 @@ export async function POST(req) {
       locationData.address = address.trim();
     }
 
+    // ===== STEP 4: Create and save complaint =====
     const newComplaint = new complaintModel({
       createdBy: userId,
       imageUrl: imageUrl,
-      issueType: issueType || 'other',
+      issueType: issueType || aiCategory || 'other',
       description: description.trim(),
-      assignedDepartment: assignedDepartment || '',
-      location: locationData
-    })
+      assignedDepartment: assignedDepartment,
+      location: locationData,
+      
+      // Store AI classification metadata
+      aiClassification: {
+        category: aiCategory,
+        confidence: aiConfidence,
+        department: classification.success ? classification.department : null,
+        description: aiDescription,
+        classifiedAt: new Date(),
+        usedGemini: classification.usedGemini || false,
+      },
+    });
 
     await newComplaint.save();
 
+    console.log("✅ Complaint saved successfully:", newComplaint._id);
+
+    // ===== STEP 5: Return response =====
     return NextResponse.json({
       success: true,
       message: "Complaint registered successfully",
-      complaint: newComplaint,
+      complaint: {
+        id: newComplaint._id,
+        imageUrl: newComplaint.imageUrl,
+        issueType: newComplaint.issueType,
+        assignedDepartment: newComplaint.assignedDepartment,
+        location: newComplaint.location,
+        createdAt: newComplaint.createdAt,
+      },
+      classification: classification.success ? {
+        category: aiCategory,
+        department: classification.department,
+        departmentSlug: assignedDepartment,
+        confidence: aiConfidence,
+        description: aiDescription,
+      } : null,
       statusCode: 201,
     });
 
   } catch (error) {
-
-    console.log("Error occurred during upload: ", error);
+    console.error("❌ Error occurred during complaint registration:", error);
     return NextResponse.json({
       success: false,
-      message: error.message || "File upload failed",
+      message: error.message || "Complaint registration failed",
       statusCode: 500,
     });
-
   }
 }

@@ -98,13 +98,24 @@ export const DEPARTMENTS = {
 export const getAllDepartments = () => Object.values(DEPARTMENTS);
 
 export const getDepartmentBySlug = (slug) => {
-  return DEPARTMENTS[slug] || null;
+  if (!slug) return null;
+
+  if (DEPARTMENTS[slug]) return DEPARTMENTS[slug];
+
+  if (DEPARTMENTS[slug.toUpperCase()]) return DEPARTMENTS[slug.toUpperCase()];
+
+  const capitalized = slug.charAt(0).toUpperCase() + slug.slice(1).toLowerCase();
+  if (DEPARTMENTS[capitalized]) return DEPARTMENTS[capitalized];
+
+  return null;
 };
+
 
 export const getDepartmentSlugs = () => {
   return Object.keys(DEPARTMENTS);
 };
 
 export const isDepartmentValid = (slug) => {
-  return slug in DEPARTMENTS;
+  if (!slug) return false;
+  return slug.toUpperCase() in DEPARTMENTS;
 };

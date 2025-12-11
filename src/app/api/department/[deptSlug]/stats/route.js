@@ -17,10 +17,10 @@ export async function GET(req, { params }) {
     }
 
     await connectDB();
-
+    const slug = deptSlug.toLowerCase();
     // Get stats for this specific department
     const stats = await complaintModel.aggregate([
-      { $match: { assignedDepartment: deptSlug } },
+      { $match: { assignedDepartment: slug } },
       {
         $group: {
           _id: "$status",

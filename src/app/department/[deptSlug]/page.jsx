@@ -32,9 +32,9 @@ export async function generateMetadata({ params }) {
 async function getDepartmentStats(deptSlug) {
   try {
     await connectDB();
-
+    const slug = deptSlug.toLowerCase();
     const stats = await complaintModel.aggregate([
-      { $match: { assignedDepartment: deptSlug } },
+      { $match: { assignedDepartment: slug } },
       {
         $group: {
           _id: "$status",
@@ -77,10 +77,10 @@ async function getDepartmentStats(deptSlug) {
 async function getRecentComplaints(deptSlug) {
   try {
     await connectDB();
-
+    const slug = deptSlug.toLowerCase();
     // FIXED: Added await here
     const recentComplaints = await complaintModel
-      .find({ assignedDepartment: deptSlug })
+      .find({ assignedDepartment: slug })
       .sort({ createdAt: -1 })
       .limit(10)
       .select('_id issueType status location createdAt description')
@@ -102,9 +102,9 @@ export default async function DepartmentDashboard({ params }) {
   if (!department) {
     notFound();
   }
-
-  const stats = await getDepartmentStats(deptSlug);
-  const recentComplaints = await getRecentComplaints(deptSlug);
+  const slug = deptSlug.toLowerCase();
+  const stats = await getDepartmentStats(slug);
+  const recentComplaints = await getRecentComplaints(slug);
 
   return (
     <div className="min-h-screen bg-gray-50">

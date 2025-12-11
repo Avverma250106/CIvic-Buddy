@@ -33,9 +33,9 @@ export async function generateMetadata({ params }) {
 async function getAllComplaints(deptSlug) {
   try {
     await connectDB();
-
+    const slug = deptSlug.toLowerCase();
     const complaints = await complaintModel
-      .find({ assignedDepartment: deptSlug })
+      .find({ assignedDepartment: slug })
       .sort({ createdAt: -1 })
       .select('_id issueType description location status createdAt priority')
       .lean();
@@ -60,9 +60,9 @@ async function getAllComplaints(deptSlug) {
 async function getComplaintStats(deptSlug) {
   try {
     await connectDB();
-
+    const slug = deptSlug.toLowerCase();
     const stats = await complaintModel.aggregate([
-      { $match: { assignedDepartment: deptSlug } },
+      { $match: { assignedDepartment: slug } },
       {
         $group: {
           _id: "$status",
@@ -100,8 +100,9 @@ export default async function AllComplaintsPage({ params }) {
     notFound();
   }
 
-  const complaints = await getAllComplaints(deptSlug);
-  const stats = await getComplaintStats(deptSlug);
+  const slug = deptSlug.toLowerCase();
+  const complaints = await getAllComplaints(slug);
+  const stats = await getComplaintStats(slug);
 
   return (
     <div className="min-h-screen bg-gray-50">

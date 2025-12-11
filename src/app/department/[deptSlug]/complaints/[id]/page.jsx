@@ -42,7 +42,7 @@ export default function ComplaintDetailPage() {
   const handleStatusUpdate = async (newStatus) => {
     try {
       setUpdating(true);
-      await axios.patch(`/api/complaints/${complaintId}/status`, {
+      await axios.patch(`/api/complaint/${complaintId}/status`, {
         status: newStatus,
       });
       toast.success(`Complaint status updated to ${newStatus}`);
