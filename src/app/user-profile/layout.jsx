@@ -79,7 +79,7 @@ function layout({ children }) {
 
   return (
     <div>
-      <div className="md:w-64 fixed md:block bg-green-200">
+      <div className="md:w-64 fixed md:block bg-gray-100">
         <Sidebar response={response} />
       </div>
       <div className="md:ml-64">{children}</div>

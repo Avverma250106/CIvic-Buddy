@@ -269,6 +269,7 @@ export default async function DepartmentDashboard({ params }) {
                           ? 'In Progress' 
                           : complaint.status.charAt(0).toUpperCase() + complaint.status.slice(1)}
                       </span>
+                      
                     </div>
                   </div>
                 </Link>

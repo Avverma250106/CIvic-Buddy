@@ -10,13 +10,15 @@ export default function Page() {
     try {
       const response = await axios.get("/api/users/your-complaints")
       setResp(response.data) 
+      console.log("Complaints data: ", response.data)
     } catch (error) {
       console.error("Error fetching complaints:", error)
     }
   }
 
   useEffect(() => {
-    getDataFromBackend()
+    getDataFromBackend();
+    console.log("Your response here ", resp);
   }, [])
 
   return (
@@ -25,6 +27,7 @@ export default function Page() {
         resp.complaints.map((complain) => (
           <Card
             key={complain._id}
+            issue_type={complain.issueType}
             imageUrl={complain.imageUrl}
             id={complain._id}
             description={complain.description}

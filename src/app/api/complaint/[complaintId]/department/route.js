@@ -10,6 +10,8 @@ export async function PATCH(req, { params }) {
     const body = await req.json();
     const { department } = body;
 
+    const deptLower = department.toLowerCase();
+
     // Validate department
     const deptConfig = getDepartmentBySlug(department);
     if (!department || !deptConfig) {
@@ -47,7 +49,7 @@ export async function PATCH(req, { params }) {
     const complaint = await complaintModel.findByIdAndUpdate(
       complaintId,
       {
-        assignedDepartment: department,
+        assignedDepartment: deptLower,
         updatedAt: new Date(),
       },
       { new: true }

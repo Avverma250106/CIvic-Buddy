@@ -40,13 +40,12 @@ export default function Page() {
   const issueTypes = [
     { value: "pothole", label: "Pothole" },
     { value: "streetlight_broken", label: "Street Light" },
-    { value: "garbage_dumping", label: "Garbage Collection" },
-    { value: "water_supply", label: "Water Supply" },
+    { value: "garbage_dumping", label: "Garbage Collection" }, // construction debris, overflowing drains, fallen trees on road, manhole
     { value: "sewage", label: "Sewage Problem" },
-    { value: "road_damage", label: "Road Damage" },
-    { value: "traffic_signal", label: "Traffic Signal" },
-    { value: "illegal_construction", label: "Illegal Construction" },
-    { value: "noise_pollution", label: "Noise Pollution" },
+    { value: "contruction_debris", label: "Construction Debris" },
+    { value: "fallen_trees", label: "Fallen Trees" },
+    { value: "overflowing_drains", label: "Overflowing Drains" },
+    {value: "damaged_sidewalk", label: "Damaged Sidewalk" },
     { value: "other", label: "Other" }
   ];
 
