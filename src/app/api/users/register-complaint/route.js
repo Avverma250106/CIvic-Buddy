@@ -61,7 +61,7 @@ function mapDepartmentToSlug(department) {
     'Environment': 'environment',
   };
   
-  return departmentMap[department] || 'general';
+  return departmentMap[department] || 'nrda';
 }
 
 export async function POST(req) {

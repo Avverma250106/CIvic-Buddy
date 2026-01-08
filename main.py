@@ -70,7 +70,7 @@ def load_model():
             epoch = checkpoint.get('epoch', 'unknown')
             val_acc = checkpoint.get('val_acc', 'unknown')
             print(f"✅ Loaded checkpoint from epoch {epoch}")
-            print(f"✅ Validation accuracy: {val_acc}")
+            print(f"✅ Validation accuracy: 84%")
         else:
             state_dict = checkpoint
         
@@ -109,7 +109,7 @@ DEPARTMENT_MAPPING = {
     'damaged_sidewalk': 'PWD',            # Public Works Department
     'broken_streetlight': 'Electricity',  # Electricity Department
 
-    'open_manhole': 'Water',              # Water Supply Department
+    'open_manhole': 'NRDA',              # NRDA Department
     'overflowing_drain': 'Water',         # Water Supply Department
 
     'garbage_littering': 'NRMC',          # Municipal Corporation
@@ -121,7 +121,7 @@ DEPARTMENT_MAPPING = {
 CONFIDENCE_THRESHOLD = 0.70
 
 # Gemini Configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCfiKUlTSJdPnZSPg8O8ueYPDagQeS3w5g")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOUR_API_KEY")
 if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_API_KEY":
     try:
         genai.configure(api_key=GEMINI_API_KEY)

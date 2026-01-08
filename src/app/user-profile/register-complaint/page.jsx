@@ -41,7 +41,7 @@ export default function Page() {
     { value: "pothole", label: "Pothole" },
     { value: "streetlight_broken", label: "Street Light" },
     { value: "garbage_dumping", label: "Garbage Collection" }, // construction debris, overflowing drains, fallen trees on road, manhole
-    { value: "sewage", label: "Sewage Problem" },
+    { value: "open_manhole", label: "Open Manhole" },
     { value: "contruction_debris", label: "Construction Debris" },
     { value: "fallen_trees", label: "Fallen Trees" },
     { value: "overflowing_drains", label: "Overflowing Drains" },

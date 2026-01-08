@@ -28,6 +28,7 @@ const complaintSchema = new mongoose.Schema(
 	      "fallen_trees",
 	      "overflowing_drains",
 	      "damaged_sidewalk",
+        "open_manhole",
         "other",
       ],
       default: 'other',

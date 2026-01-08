@@ -1,4 +1,3 @@
-"use client"
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter, usePathname } from "next/navigation";
@@ -69,14 +68,14 @@ function Sidebar({ response }) {
 
   useEffect(()=>{
     getComplaintCount();
-  },[])
+  },[complaintCount])
 
   return (
     <>
       {/* Mobile Menu Button */}
       <button
         onClick={toggleMobileMenu}
-        className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border"
+        className="md:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg border"
       >
         {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -92,7 +91,7 @@ function Sidebar({ response }) {
       {/* Sidebar */}
       <div
         className={`
-        fixed top-0 left-0 h-[100vh] bg-white text-white shadow-2xl z-40 transition-transform duration-300 ease-in-out
+        fixed top-0 left-0 h-[100vh] bg-gradient-to-b from-gray-800 to-gray-900 text-white shadow-2xl z-40 transition-transform duration-300 ease-in-out
         md:translate-x-0 md:static md:z-auto
         ${
           isMobileMenuOpen
@@ -105,7 +104,7 @@ function Sidebar({ response }) {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-gray-700">
-            <h2 className="text-2xl font-bold text-center text-white">Complaint Portal</h2>
+            <h2 className="text-2xl font-bold text-center">Complaint Portal</h2>
           </div>
 
           {/* User Information */}
