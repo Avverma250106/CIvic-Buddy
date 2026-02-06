@@ -11,6 +11,9 @@ import google.generativeai as genai
 import requests
 import io
 import os
+from dotenv import load_dotenv
+load_dotenv(".env.local")
+
 
 # ====================== MODEL DEFINITION =======================
 
@@ -121,7 +124,7 @@ DEPARTMENT_MAPPING = {
 CONFIDENCE_THRESHOLD = 0.70
 
 # Gemini Configuration
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "YOUR_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY and GEMINI_API_KEY != "YOUR_API_KEY":
     try:
         genai.configure(api_key=GEMINI_API_KEY)
